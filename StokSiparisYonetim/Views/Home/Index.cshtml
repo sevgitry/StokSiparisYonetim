@@ -1,0 +1,486 @@
+﻿@using EntityLayer.DTOs
+@model List<ProductResponseDto>
+@{
+    ViewData["Title"] = "Stok Paneli";
+    var userName = ViewBag.UserName;
+    var userRole = ViewBag.UserRole;
+}
+@Html.AntiForgeryToken()
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show">
+        <i class="fas fa-exclamation-circle me-2"></i>@TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+<div class="container-fluid">
+
+    <!-- Alert Messages -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card stat-card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h4 class="mb-0">@Model.Sum(p => p.Amount)</h4>
+                            <p class="mb-0">Toplam Stok</p>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-boxes fs-1 opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card stat-card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h4 class="mb-0">@Model.Count(p => p.Amount > 10)</h4>
+                            <p class="mb-0">Bol Stoklu</p>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-check-circle fs-1 opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card stat-card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h4 class="mb-0">@Model.Count(p => p.Amount > 0 && p.Amount <= 10)</h4>
+                            <p class="mb-0">Azalan Stok</p>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-exclamation-triangle fs-1 opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card stat-card bg-danger text-white">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h4 class="mb-0">@Model.Count(p => p.Amount == 0)</h4>
+                            <p class="mb-0">Stokta Yok</p>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-times-circle fs-1 opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Grid -->
+    <div class="row">
+        @foreach (var product in Model.OrderBy(p => p.Amount))
+        {
+            <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
+                <div class="card product-card h-100 @GetCardBorderClass(product.Amount)">
+                    <div class="card-header @GetCardHeaderClass(product.Amount)">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h6 class="card-title mb-0 text-truncate">@product.ProductName</h6>
+                            <span class="badge @GetStockBadgeClass(product.Amount)">
+                                @product.Amount
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="product-info">
+                            <div class="info-item">
+                                <i class="fas fa-tag me-2 text-primary"></i>
+                                <strong>Satış:</strong>
+                                <span class="float-end">@product.SellPrice.ToString("C2")</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="fas fa-shopping-cart me-2 text-success"></i>
+                                <strong>Alış:</strong>
+                                <span class="float-end">@product.PurchasePrice.ToString("C2")</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="fas fa-layer-group me-2 text-info"></i>
+                                <strong>Kategori:</strong>
+                                <span class="float-end">@product.CategoryName</span>
+                            </div>
+                            
+                        </div>
+
+                        @if (product.Amount > 0)
+                        {
+                            <div class="mt-3">
+                                <div class="input-group mb-2">
+                                    <input type="number"
+                                           class="form-control form-control-sm quantity-input"
+                                           data-product-id="@product.Id"
+                                           value="1"
+                                           min="1"
+                                           max="@product.Amount"
+                                           placeholder="Adet" />
+                                    <button type="button"
+                                            class="btn btn-success btn-sm add-to-cart-btn"
+                                            data-product-id="@product.Id"
+                                            data-product-name="@product.ProductName"
+                                            data-product-price="@product.SellPrice"
+                                            data-max-stock="@product.Amount">
+                                        <i class="fas fa-cart-plus me-1"></i>Sepete Ekle
+                                    </button>
+                                </div>
+                                
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-warning text-center py-2 mt-3 mb-0">
+                                <i class="fas fa-exclamation-circle me-1"></i>
+                                Stokta Yok
+                            </div>
+                        }
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <small class="text-muted">
+                            <i class="fas fa-calendar me-1"></i>
+                            @product.CreatedDate.ToString("dd.MM.yyyy")
+                        </small>
+                        <span class="float-end">
+                            <span class="badge @(product.Status == 1 ? "bg-success" : "bg-secondary")">
+                                @product.StatusText
+                            </span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Empty State -->
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5">
+            <i class="fas fa-box-open fa-4x text-muted mb-3"></i>
+            <h3 class="text-muted">Henüz hiç ürün bulunmuyor</h3>
+            <p class="text-muted">Stok panelinde görüntülenecek ürün yok.</p>
+        </div>
+    }
+</div>
+
+<!-- Success Toast -->
+<div class="toast-container position-fixed top-0 end-0 p-3">
+    <div id="successToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header bg-success text-white">
+            <i class="fas fa-check-circle me-2"></i>
+            <strong class="me-auto">Başarılı</strong>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+        </div>
+        <div class="toast-body">
+            Ürün sepete başarıyla eklendi!
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .stat-card {
+            border: none;
+            border-radius: 15px;
+            transition: transform 0.2s;
+        }
+
+            .stat-card:hover {
+                transform: translateY(-5px);
+            }
+
+        .product-card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+            .product-card:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+            }
+
+        .card-header {
+            border-bottom: 2px solid rgba(0,0,0,0.1);
+            font-weight: 600;
+        }
+
+        .info-item {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+            .info-item:last-child {
+                border-bottom: none;
+            }
+
+        .bg-stock-high {
+            background: linear-gradient(135deg, #198754, #20c997);
+        }
+
+        .bg-stock-medium {
+            background: linear-gradient(135deg, #fd7e14, #ffc107);
+        }
+
+        .bg-stock-low {
+            background: linear-gradient(135deg, #dc3545, #e83e8c);
+        }
+
+        .bg-stock-none {
+            background: linear-gradient(135deg, #6c757d, #adb5bd);
+        }
+
+        .border-stock-high {
+            border-left: 4px solid #198754 !important;
+        }
+
+        .border-stock-medium {
+            border-left: 4px solid #fd7e14 !important;
+        }
+
+        .border-stock-low {
+            border-left: 4px solid #dc3545 !important;
+        }
+
+        .border-stock-none {
+            border-left: 4px solid #6c757d !important;
+        }
+
+        .badge {
+            font-size: 0.75rem;
+            padding: 0.35em 0.65em;
+        }
+
+        .add-to-cart-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .quantity-input:invalid {
+            border-color: #dc3545;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            console.log('Sayfa yüklendi - JavaScript çalışıyor');
+
+            // Sepete ekle butonu tıklama event'i
+            $(document).on('click', '.add-to-cart-btn', function() {
+                var button = $(this);
+                var productId = button.data('product-id');
+                var productName = button.data('product-name');
+                var unitPrice = button.data('product-price');
+                var maxStock = button.data('max-stock');
+                var quantityInput = button.closest('.input-group').find('.quantity-input');
+                var quantity = parseInt(quantityInput.val());
+
+                // Validasyon
+                if (quantity < 1) {
+                    alert('Lütfen geçerli bir miktar giriniz.');
+                    return;
+                }
+
+                if (quantity > maxStock) {
+                    alert('Stokta yeterli ürün bulunmamaktadır. Maksimum: ' + maxStock);
+                    quantityInput.val(maxStock);
+                    return;
+                }
+
+                // Butonu devre dışı bırak ve yükleniyor durumuna getir
+                button.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i>Ekleniyor...');
+
+                // AJAX isteği
+                $.ajax({
+                    url: '@Url.Action("AddToCart", "Cart")',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        ProductId: productId,
+                        ProductName: productName,
+                        UnitPrice: unitPrice,
+                        Quantity: quantity,
+                        MaxStock: maxStock,
+                        ImageUrl: ''
+                    }),
+                    headers: {
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            // Başarılı mesajı göster
+                            showSuccessToast(response.message);
+
+                            // Sepet sayacını güncelle
+                            updateCartItemCount(response.itemCount);
+
+                            // Butonu animasyonla güncelle
+                            button.html('<i class="fas fa-check me-1"></i>Eklendi!');
+                            button.removeClass('btn-success').addClass('btn-primary');
+
+                            // 2 saniye sonra butonu eski haline getir
+                            setTimeout(function() {
+                                button.html('<i class="fas fa-cart-plus me-1"></i>Sepete Ekle');
+                                button.removeClass('btn-primary').addClass('btn-success');
+                                button.prop('disabled', false);
+                            }, 2000);
+                        } else {
+                            // Hata mesajı göster
+                            showErrorToast(response.message);
+                            button.prop('disabled', false).html('<i class="fas fa-cart-plus me-1"></i>Sepete Ekle');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Sepete ekleme hatası:', error);
+                        showErrorToast('Sepete ekleme sırasında bir hata oluştu: ' + error);
+                        button.prop('disabled', false).html('<i class="fas fa-cart-plus me-1"></i>Sepete Ekle');
+                    }
+                });
+            });
+
+            // Sepet sayacını güncelleme fonksiyonu
+            function updateCartItemCount(count) {
+                // Navbar'daki sepet sayacını güncelle
+                $('.cart-item-count').text(count);
+
+                // Eğer navbar'da sepet sayacı yoksa, oluştur
+                if ($('.cart-item-count').length === 0) {
+                    // Navbar'a sepet sayacı ekle (isteğe bağlı)
+                    console.log('Sepet sayacı güncellendi: ' + count);
+                }
+            }
+
+            // Başarı toast'ı gösterme fonksiyonu
+            function showSuccessToast(message) {
+                var toast = $('#successToast');
+                toast.find('.toast-body').text(message || 'Ürün sepete başarıyla eklendi!');
+                var bsToast = new bootstrap.Toast(toast[0]);
+                bsToast.show();
+            }
+
+            // Hata toast'ı gösterme fonksiyonu
+            function showErrorToast(message) {
+                // Hata toast'ı oluştur veya alert göster
+                alert('Hata: ' + message);
+            }
+
+            // Sayfa yüklendiğinde sepet sayacını güncelle
+            updateCartOnLoad();
+
+            function updateCartOnLoad() {
+                $.get('@Url.Action("GetCartItemCount", "Cart")', function(count) {
+                    updateCartItemCount(count);
+                }).fail(function() {
+                    console.log('Sepet sayacı yüklenemedi');
+                });
+            }
+
+            // Quantity input validasyonu
+            $(document).on('change', '.quantity-input', function() {
+                var input = $(this);
+                var maxStock = parseInt(input.attr('max'));
+                var value = parseInt(input.val());
+
+                if (value < 1) {
+                    input.val(1);
+                } else if (value > maxStock) {
+                    input.val(maxStock);
+                    alert('Maksimum stok: ' + maxStock);
+                }
+            });
+        });
+    </script>
+}
+
+
+    <style>
+        .pulse-animation {
+            animation: pulse 0.5s ease-in-out;
+        }
+
+        @@keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.2);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .add-to-cart-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .quantity-input:invalid {
+            border-color: #dc3545;
+        }
+    </style>
+
+@functions {
+    public string GetStockBadgeClass(int amount)
+    {
+        if (amount == 0) return "bg-danger";
+        if (amount <= 5) return "bg-warning";
+        if (amount <= 10) return "bg-info";
+        return "bg-success";
+    }
+
+    public string GetCardHeaderClass(int amount)
+    {
+        if (amount == 0) return "bg-stock-none text-white";
+        if (amount <= 5) return "bg-stock-low text-white";
+        if (amount <= 10) return "bg-stock-medium text-white";
+        return "bg-stock-high text-white";
+    }
+
+    public string GetCardBorderClass(int amount)
+    {
+        if (amount == 0) return "border-stock-none";
+        if (amount <= 5) return "border-stock-low";
+        if (amount <= 10) return "border-stock-medium";
+        return "border-stock-high";
+    }
+}

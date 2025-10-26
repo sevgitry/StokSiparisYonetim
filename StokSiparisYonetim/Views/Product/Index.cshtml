@@ -1,0 +1,35 @@
+﻿@using EntityLayer
+@model List<Product>
+@{
+    ViewData["Title"] = "Ürünler";
+}
+
+<div class="container">
+    <h2>Tüm Ürünler</h2>
+
+    <div class="row">
+        @foreach (var product in Model)
+        {
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">@product.ProductName</h5>
+                        <p class="card-text">
+                            <strong>Fiyat:</strong> @product.SellPrice TL<br>
+                            <strong>Stok:</strong> @product.Amount<br>
+                            <strong>Alış Fiyatı:</strong> @product.PurchasePrice TL
+                        </p>
+
+                        <form method="post" asp-action="CreateOrder">
+                            <input type="hidden" name="productId" value="@product.Id" />
+                            <div class="input-group">
+                                <input type="number" name="quantity" class="form-control" value="1" min="1" max="@product.Amount" />
+                                <button type="submit" class="btn btn-primary">Sipariş Ver</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

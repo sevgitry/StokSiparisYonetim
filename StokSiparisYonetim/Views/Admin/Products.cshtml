@@ -1,0 +1,404 @@
+﻿@model List<EntityLayer.DTOs.ProductResponseDto>
+@{
+    ViewData["Title"] = "Ürün Yönetimi";
+    var categories = ViewData["Categories"] as List<EntityLayer.DTOs.Category.CategoryResponseDto> ?? new List<EntityLayer.DTOs.Category.CategoryResponseDto>();
+    var sellers = ViewData["Sellers"] as List<EntityLayer.DTOs.User.UserResponseDto> ?? new List<EntityLayer.DTOs.User.UserResponseDto>();
+}
+
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-1">
+                        <i class="fas fa-boxes me-2 text-primary"></i>Ürün Yönetimi
+                    </h1>
+                    <p class="text-muted">Tüm ürünleri görüntüle ve yönet</p>
+                </div>
+                <div>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProductModal">
+                        <i class="fas fa-plus me-2"></i>Yeni Ürün Ekle
+                    </button>
+                    <a href="@Url.Action("Index", "Admin")" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Geri
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Messages -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Products Table -->
+    <div class="card">
+        <div class="card-header bg-light">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-list me-2"></i>Ürün Listesi (@Model.Count ürün)
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Ürün Adı</th>
+                            <th>Kategori</th>
+                            <th>Satıcı</th>
+                            <th>Stok</th>
+                            <th>Alış Fiyatı</th>
+                            <th>Satış Fiyatı</th>
+                            <th>Durum</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var product in Model)
+                        {
+                            <tr>
+                                <td>@product.Id</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="rounded bg-secondary me-3 d-flex align-items-center justify-content-center"
+                                             style="width: 40px; height: 40px;">
+                                            <i class="fas fa-box text-white"></i>
+                                        </div>
+                                        <div>
+                                            <strong>@product.ProductName</strong>
+                                            <br>
+                                            <small class="text-muted">@product.CreatedDate.ToString("dd.MM.yyyy")</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info">@product.CategoryName</span>
+                                </td>
+                                <td>
+                                    <small>@product.SellerName</small>
+                                    <br>
+                                    <small class="text-muted">ID: @product.SellerId</small>
+                                </td>
+                                <td>
+                                    <span class="badge @GetStockBadgeClass(product.Amount)">
+                                        @product.Amount
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="text-danger fw-bold">@product.PurchasePrice.ToString("C2")</span>
+                                </td>
+                                <td>
+                                    <strong class="text-success">@product.SellPrice.ToString("C2")</strong>
+                                </td>
+                                <td>
+                                    <span class="badge @(product.Status == 1 ? "bg-success" : "bg-secondary")">
+                                        @product.StatusText
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-outline-primary"
+                                                onclick="editProduct(@product.Id)"
+                                                data-bs-toggle="tooltip" title="Düzenle">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-outline-warning"
+                                                onclick="toggleProductStatus(@product.Id, @product.Status)"
+                                                data-bs-toggle="tooltip" title='@(product.Status == 1 ? "Pasif Yap" : "Aktif Yap")'>
+                                            <i class="fas @(product.Status == 1 ? "fa-pause" : "fa-play")"></i>
+                                        </button>
+                                        <button class="btn btn-outline-danger"
+                                                onclick="deleteProduct(@product.Id, '@product.ProductName')"
+                                                data-bs-toggle="tooltip" title="Sil">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Product Modal -->
+<div class="modal fade" id="addProductModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus me-2"></i>Yeni Ürün Ekle
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="addProductForm" method="post" asp-action="CreateProduct">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Ürün Adı *</label>
+                            <input type="text" class="form-control" name="ProductName" required maxlength="200">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Kategori *</label>
+                            <select class="form-select" name="CategoryId" required>
+                                <option value="">Kategori Seçin</option>
+                                @foreach (var category in categories)
+                                {
+                                    <option value="@category.Id">@category.Name</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Satıcı *</label>
+                            <select class="form-select" name="SellerId" required>
+                                <option value="">Satıcı Seçin</option>
+                                @foreach (var seller in sellers)
+                                {
+                                    <option value="@seller.Id">@seller.Name</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Alış Fiyatı *</label>
+                            <div class="input-group">
+                                <span class="input-group-text">₺</span>
+                                <input type="number" step="0.01" class="form-control" name="PurchasePrice" required min="0">
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Satış Fiyatı *</label>
+                            <div class="input-group">
+                                <span class="input-group-text">₺</span>
+                                <input type="number" step="0.01" class="form-control" name="SellPrice" required min="0">
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Stok Miktarı *</label>
+                            <input type="number" class="form-control" name="Amount" required min="0">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Durum *</label>
+                            <select class="form-select" name="Status" required>
+                                <option value="1" selected>Aktif</option>
+                                <option value="0">Pasif</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-primary">Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Product Modal -->
+<div class="modal fade" id="editProductModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-edit me-2"></i>Ürün Düzenle
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="editProductForm" method="post" asp-action="UpdateProduct">
+                <input type="hidden" name="Id" id="editProductId">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Ürün Adı *</label>
+                            <input type="text" class="form-control" name="ProductName" id="editProductName" required maxlength="200">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Kategori *</label>
+                            <select class="form-select" name="CategoryId" id="editCategoryId" required>
+                                @foreach (var category in categories)
+                                {
+                                    <option value="@category.Id">@category.Name</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Satıcı *</label>
+                            <select class="form-select" name="SellerId" id="editSellerId" required>
+                                @foreach (var seller in sellers)
+                                {
+                                    <option value="@seller.Id">@seller.Name</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Alış Fiyatı *</label>
+                            <div class="input-group">
+                                <span class="input-group-text">₺</span>
+                                <input type="number" step="0.01" class="form-control" name="PurchasePrice" id="editPurchasePrice" required min="0">
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Satış Fiyatı *</label>
+                            <div class="input-group">
+                                <span class="input-group-text">₺</span>
+                                <input type="number" step="0.01" class="form-control" name="SellPrice" id="editSellPrice" required min="0">
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Stok Miktarı *</label>
+                            <input type="number" class="form-control" name="Amount" id="editAmount" required min="0">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Durum *</label>
+                            <select class="form-select" name="Status" id="editStatus" required>
+                                <option value="1">Aktif</option>
+                                <option value="0">Pasif</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-primary">Güncelle</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .table th {
+            border-top: none;
+            font-weight: 600;
+        }
+
+        .badge {
+            font-size: 0.75rem;
+            padding: 0.5em 0.75em;
+        }
+
+        .btn-group-sm > .btn {
+            padding: 0.25rem 0.5rem;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        // Tooltip'leri aktif et
+        $(function () {
+            $('[data-bs-toggle="tooltip"]').tooltip();
+        });
+
+        // Ürün düzenle
+        function editProduct(productId) {
+            // AJAX ile ürün bilgilerini getir
+            $.get('@Url.Action("GetProduct", "Admin")', { id: productId }, function(response) {
+                if (response.success) {
+                    const product = response;
+                    $('#editProductId').val(product.id);
+                    $('#editProductName').val(product.productName);
+                    $('#editCategoryId').val(product.categoryId);
+                    $('#editSellerId').val(product.sellerId);
+                    $('#editPurchasePrice').val(product.purchasePrice);
+                    $('#editSellPrice').val(product.sellPrice);
+                    $('#editAmount').val(product.amount);
+                    $('#editStatus').val(product.status);
+
+                    $('#editProductModal').modal('show');
+                } else {
+                    alert('Ürün bilgileri yüklenirken hata oluştu: ' + response.message);
+                }
+            }).fail(function() {
+                alert('Ürün bilgileri yüklenirken hata oluştu!');
+            });
+        }
+
+        // Ürün durumunu değiştir
+        function toggleProductStatus(productId, currentStatus) {
+            const newStatus = currentStatus === 1 ? 0 : 1;
+            const action = currentStatus === 1 ? 'pasif yapmak' : 'aktif yapmak';
+
+            if (confirm(`Bu ürünü ${action} istediğinizden emin misiniz?`)) {
+                $.post('@Url.Action("ToggleProductStatus", "Admin")', {
+                    id: productId,
+                    status: newStatus
+                }, function(response) {
+                    if (response.success) {
+                        location.reload();
+                    } else {
+                        alert('İşlem başarısız: ' + response.message);
+                    }
+                });
+            }
+        }
+
+        // Ürün sil
+        function deleteProduct(productId, productName) {
+            if (confirm(`"${productName}" ürününü silmek istediğinizden emin misiniz?`)) {
+                $.post('@Url.Action("DeleteProduct", "Admin")', { id: productId }, function(response) {
+                    if (response.success) {
+                        location.reload();
+                    } else {
+                        alert('Silme işlemi başarısız: ' + response.message);
+                    }
+                });
+            }
+        }
+
+        // Edit form submit
+        $('#editProductForm').on('submit', function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+
+            $.ajax({
+                url: $(this).attr('action'),
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    if (response.success) {
+                        $('#editProductModal').modal('hide');
+                        location.reload();
+                    } else {
+                        alert('Güncelleme başarısız: ' + response.message);
+                    }
+                },
+                error: function() {
+                    alert('Güncelleme sırasında hata oluştu!');
+                }
+            });
+        });
+    </script>
+}
+
+@functions {
+    public string GetStockBadgeClass(int amount)
+    {
+        if (amount == 0) return "bg-danger";
+        if (amount <= 5) return "bg-warning";
+        if (amount <= 10) return "bg-info";
+        return "bg-success";
+    }
+}

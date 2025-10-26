@@ -1,0 +1,410 @@
+﻿@model List<EntityLayer.DTOs.Order.OrderResponseDto>
+@{
+    ViewData["Title"] = "Sipariş Yönetimi";
+}
+
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-1">
+                        <i class="fas fa-shopping-cart me-2 text-info"></i>Sipariş Yönetimi
+                    </h1>
+                    <p class="text-muted">Tüm siparişleri görüntüle ve yönet</p>
+                </div>
+                <div>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-outline-info dropdown-toggle" data-bs-toggle="dropdown">
+                            <i class="fas fa-filter me-2"></i>Filtrele
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" onclick="filterOrders('all')">Tümü</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="filterOrders(1)">Bekleyen</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="filterOrders(2)">Onaylanan</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="filterOrders(3)">İptal Edilen</a></li>
+                        </ul>
+                    </div>
+                    <a href="@Url.Action("Index", "Admin")" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Geri
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stat-card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h4 class="mb-0">@Model.Count</h4>
+                            <p class="mb-0">Toplam Sipariş</p>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-shopping-cart fs-1 opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stat-card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h4 class="mb-0">@Model.Count(o => o.Status == 1)</h4>
+                            <p class="mb-0">Bekleyen</p>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-clock fs-1 opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stat-card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h4 class="mb-0">@Model.Count(o => o.Status == 2)</h4>
+                            <p class="mb-0">Onaylanan</p>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-check-circle fs-1 opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stat-card bg-danger text-white">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h4 class="mb-0">@Model.Count(o => o.Status == 3)</h4>
+                            <p class="mb-0">İptal Edilen</p>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-times-circle fs-1 opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Messages -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Orders Table -->
+    <div class="card">
+        <div class="card-header bg-light">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-list me-2"></i>Sipariş Listesi
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped" id="ordersTable">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Sipariş No</th>
+                            <th>Müşteri</th>
+                            <th>Tarih</th>
+                            <th>Ürünler</th>
+                            <th>Toplam Tutar</th>
+                            <th>Durum</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var order in Model)
+                        {
+                            <tr class="order-row" data-status="@order.Status">
+                                <td>
+                                    <strong>#@order.Id</strong>
+                                    <!-- OrderNumber olmadığı için sadece ID gösteriyoruz -->
+                                </td>
+                                <td>
+                                    <strong>@order.CustomerName</strong>
+                                    @if (!string.IsNullOrEmpty(order.CustomerTaxNo))
+                                    {
+                                        <br>
+                                        <small class="text-muted">Vergi No: @order.CustomerTaxNo</small>
+                                    }
+                                    else
+                                    {
+                                        <br>
+                                        <small class="text-muted">ID: @order.CustomerId</small>
+                                    }
+                                </td>
+                                <td>
+                                    @order.OrderDate.ToString("dd.MM.yyyy")
+                                    <br>
+                                    <small class="text-muted">@order.OrderDate.ToString("HH:mm")</small>
+                                </td>
+                                <td>
+                                    <div class="order-items">
+                                        @foreach (var item in order.OrderItems.Take(2))
+                                        {
+                                            <div class="d-flex align-items-center mb-1">
+                                                <small>
+                                                    <strong>@item.ProductName</strong>
+                                                    <span class="text-muted">x @item.Quantity</span>
+                                                    <br>
+                                                    <em class="text-muted">@item.UnitPrice.ToString("C2")</em>
+                                                </small>
+                                            </div>
+                                        }
+                                        @if (order.OrderItems.Count > 2)
+                                        {
+                                            <small class="text-primary">
+                                                + @(order.OrderItems.Count - 2) ürün daha...
+                                            </small>
+                                        }
+                                        <div class="mt-1">
+                                            <small class="text-muted">
+                                                @order.OrderItems.Sum(oi => oi.Quantity) adet
+                                            </small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <strong class="text-success">@order.TotalAmount.ToString("C2")</strong>
+                                </td>
+                                <td>
+                                    <span class="badge @GetStatusBadgeClass(order.Status)">
+                                        @order.StatusText
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-outline-primary"
+                                                onclick="viewOrderDetails(@order.Id)"
+                                                data-bs-toggle="tooltip" title="Detaylar">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+
+                                        @if (order.Status == 1) // Bekleyen
+                                        {
+                                            <form method="post" asp-action="ApproveOrder" class="d-inline">
+                                                <input type="hidden" name="id" value="@order.Id" />
+                                                <input type="hidden" name="rowVersion" value="@Convert.ToBase64String(order.RowVersion)" />
+                                                <button type="submit" class="btn btn-outline-success"
+                                                        data-bs-toggle="tooltip" title="Onayla"
+                                                        onclick="return confirm('Bu siparişi onaylamak istediğinizden emin misiniz?')">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                            </form>
+
+                                            <form method="post" asp-action="CancelOrder" class="d-inline">
+                                                <input type="hidden" name="id" value="@order.Id" />
+                                                <input type="hidden" name="rowVersion" value="@Convert.ToBase64String(order.RowVersion)" />
+                                                <button type="submit" class="btn btn-outline-danger"
+                                                        data-bs-toggle="tooltip" title="İptal Et"
+                                                        onclick="return confirm('Bu siparişi iptal etmek istediğinizden emin misiniz? Stoklar iade edilecek.')">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                        else if (order.Status == 2) // Onaylanan
+                                        {
+                                            <form method="post" asp-action="CancelOrder" class="d-inline">
+                                                <input type="hidden" name="id" value="@order.Id" />
+                                                <input type="hidden" name="rowVersion" value="@Convert.ToBase64String(order.RowVersion)" />
+                                                <button type="submit" class="btn btn-outline-danger"
+                                                        data-bs-toggle="tooltip" title="İptal Et"
+                                                        onclick="return confirm('Bu siparişi iptal etmek istediğinizden emin misiniz? Stoklar iade edilecek.')">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </form>
+                                        }
+
+                                        <button class="btn btn-outline-info"
+                                                onclick="printOrder(@order.Id)"
+                                                data-bs-toggle="tooltip" title="Yazdır">
+                                            <i class="fas fa-print"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Order Details Modal -->
+<div class="modal fade" id="orderDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-info-circle me-2"></i>Sipariş Detayları - #<span id="orderDetailId"></span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="orderDetailsContent">
+                <!-- Order details will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+                <button type="button" class="btn btn-primary" onclick="printCurrentOrder()">
+                    <i class="fas fa-print me-2"></i>Yazdır
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .stat-card {
+            border: none;
+            border-radius: 15px;
+            transition: transform 0.2s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+            .stat-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+            }
+
+        .table th {
+            border-top: none;
+            font-weight: 600;
+        }
+
+        .badge {
+            font-size: 0.75rem;
+            padding: 0.5em 0.75em;
+        }
+
+        .btn-group-sm > .btn {
+            padding: 0.25rem 0.5rem;
+        }
+
+        .order-items {
+            max-width: 200px;
+        }
+
+        .order-row:hover {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        // Tooltip'leri aktif et
+        $(function () {
+            $('[data-bs-toggle="tooltip"]').tooltip();
+        });
+
+        let currentOrderId = 0;
+
+        // Sipariş filtreleme
+        function filterOrders(status) {
+            const rows = document.querySelectorAll('.order-row');
+            rows.forEach(row => {
+                if (status === 'all' || row.getAttribute('data-status') == status) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        // Sipariş detaylarını görüntüle
+        function viewOrderDetails(orderId) {
+            currentOrderId = orderId;
+            $('#orderDetailId').text(orderId);
+
+            // AJAX ile sipariş detaylarını yükle
+            $.get('@Url.Action("GetOrderDetails", "Admin")', { id: orderId }, function(data) {
+                $('#orderDetailsContent').html(data);
+                $('#orderDetailsModal').modal('show');
+            }).fail(function() {
+                alert('Sipariş detayları yüklenirken hata oluştu!');
+            });
+        }
+
+        // Sipariş yazdır
+        function printOrder(orderId) {
+            window.open('@Url.Action("PrintOrder", "Admin")' + '?id=' + orderId, '_blank');
+        }
+
+        // Mevcut siparişi yazdır
+        function printCurrentOrder() {
+            if (currentOrderId > 0) {
+                printOrder(currentOrderId);
+            }
+        }
+
+        // Sayfa yüklendiğinde animasyon
+        $(document).ready(function() {
+            $('.order-row').hide().fadeIn(500);
+        });
+
+        // Arama fonksiyonu (opsiyonel)
+        function searchOrders() {
+            const input = document.getElementById('searchInput');
+            const filter = input.value.toUpperCase();
+            const table = document.getElementById('ordersTable');
+            const tr = table.getElementsByTagName('tr');
+
+            for (let i = 1; i < tr.length; i++) {
+                const td = tr[i].getElementsByTagName('td');
+                let found = false;
+
+                for (let j = 0; j < td.length; j++) {
+                    if (td[j]) {
+                        const txtValue = td[j].textContent || td[j].innerText;
+                        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+
+                tr[i].style.display = found ? '' : 'none';
+            }
+        }
+    </script>
+}
+
+@functions {
+    public string GetStatusBadgeClass(int status)
+    {
+        return status switch
+        {
+            1 => "bg-warning", // Bekliyor
+            2 => "bg-success", // Onaylandı
+            3 => "bg-danger",  // İptal Edildi
+            _ => "bg-secondary"
+        };
+    }
+}

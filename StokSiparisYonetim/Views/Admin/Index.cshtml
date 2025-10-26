@@ -1,0 +1,374 @@
+﻿@{
+    ViewData["Title"] = "Admin Paneli";
+    var userCount = ViewBag.UserCount ?? 0;
+    var productCount = ViewBag.ProductCount ?? 0;
+    var orderCount = ViewBag.OrderCount ?? 0;
+}
+
+<div class="container-fluid">
+    
+    <!-- Alert Messages -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stat-card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h4 class="mb-0">@productCount</h4>
+                            <p class="mb-0">Toplam Ürün</p>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-boxes fs-1 opacity-75"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <a asp-controller="Admin" asp-action="Products" class="btn btn-light btn-sm">
+                            <i class="fas fa-cog me-1"></i>Yönet
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stat-card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h4 class="mb-0">@userCount</h4>
+                            <p class="mb-0">Toplam Kullanıcı</p>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-users fs-1 opacity-75"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <a asp-controller="Admin" asp-action="Users" class="btn btn-light btn-sm">
+                            <i class="fas fa-cog me-1"></i>Yönet
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stat-card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h4 class="mb-0">@orderCount</h4>
+                            <p class="mb-0">Toplam Sipariş</p>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-shopping-cart fs-1 opacity-75"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <a asp-controller="Admin" asp-action="Orders" class="btn btn-light btn-sm">
+                            <i class="fas fa-cog me-1"></i>Yönet
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stat-card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h4 class="mb-0">@(orderCount / 3)</h4>
+                            <p class="mb-0">Bekleyen Sipariş</p>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-clock fs-1 opacity-75"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <a asp-controller="Admin" asp-action="Orders" class="btn btn-light btn-sm">
+                            <i class="fas fa-eye me-1"></i>İncele
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions & Management Cards -->
+    <div class="row">
+        <!-- Quick Actions -->
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-bolt me-2"></i>Hızlı İşlemler
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <a asp-controller="Admin" asp-action="Products" class="btn btn-outline-primary w-100 h-100 py-3">
+                                <div class="d-flex flex-column align-items-center">
+                                    <i class="fas fa-box fs-2 mb-2"></i>
+                                    <span>Ürün Yönetimi</span>
+                                    <small class="text-muted mt-1">@productCount ürün</small>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a asp-controller="Admin" asp-action="Orders" class="btn btn-outline-success w-100 h-100 py-3">
+                                <div class="d-flex flex-column align-items-center">
+                                    <i class="fas fa-shopping-cart fs-2 mb-2"></i>
+                                    <span>Sipariş Yönetimi</span>
+                                    <small class="text-muted mt-1">@orderCount sipariş</small>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a asp-controller="Admin" asp-action="Users" class="btn btn-outline-info w-100 h-100 py-3">
+                                <div class="d-flex flex-column align-items-center">
+                                    <i class="fas fa-users fs-2 mb-2"></i>
+                                    <span>Kullanıcı Yönetimi</span>
+                                    <small class="text-muted mt-1">@userCount kullanıcı</small>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a asp-controller="Admin" asp-action="Customers" class="btn btn-outline-warning w-100 h-100 py-3">
+                                <div class="d-flex flex-column align-items-center">
+                                    <i class="fas fa-address-book fs-2 mb-2"></i>
+                                    <span>Müşteri Yönetimi</span>
+                                    <small class="text-muted mt-1">Müşteriler</small>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Information -->
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Sistem Bilgileri
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="system-info">
+                        <div class="info-item d-flex justify-content-between align-items-center py-2 border-bottom">
+                            <span class="text-muted">Sunucu Zamanı:</span>
+                            <span class="fw-bold">@DateTime.Now.ToString("HH:mm:ss")</span>
+                        </div>
+                        <div class="info-item d-flex justify-content-between align-items-center py-2 border-bottom">
+                            <span class="text-muted">ASP.NET Core:</span>
+                            <span class="badge bg-primary">v9.0</span>
+                        </div>
+                        <div class="info-item d-flex justify-content-between align-items-center py-2 border-bottom">
+                            <span class="text-muted">Veritabanı:</span>
+                            <span class="badge bg-success">SQL Server</span>
+                        </div>
+                        <div class="info-item d-flex justify-content-between align-items-center py-2 border-bottom">
+                            <span class="text-muted">Oturum:</span>
+                            <span class="badge bg-info">Aktif</span>
+                        </div>
+                        <div class="info-item d-flex justify-content-between align-items-center py-2">
+                            <span class="text-muted">Önbellek:</span>
+                            <span class="badge bg-warning">In-Memory</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <h6 class="text-muted mb-3">Sistem Durumu</h6>
+                        <div class="progress mb-2" style="height: 8px;">
+                            <div class="progress-bar bg-success" style="width: 85%"></div>
+                        </div>
+                        <div class="d-flex justify-content-between small text-muted">
+                            <span>CPU Kullanımı: 25%</span>
+                            <span>Bellek: 65%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-history me-2"></i>Son Aktiviteler
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-primary"></div>
+                            <div class="timeline-content">
+                                <h6 class="mb-1">Yeni Sipariş</h6>
+                                <p class="text-muted mb-1">#12345 numaralı sipariş oluşturuldu</p>
+                                <small class="text-muted">2 dakika önce</small>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-success"></div>
+                            <div class="timeline-content">
+                                <h6 class="mb-1">Stok Güncelleme</h6>
+                                <p class="text-muted mb-1">"iPhone 15" ürününün stoğu güncellendi</p>
+                                <small class="text-muted">15 dakika önce</small>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-warning"></div>
+                            <div class="timeline-content">
+                                <h6 class="mb-1">Kullanıcı Girişi</h6>
+                                <p class="text-muted mb-1">Admin kullanıcısı sisteme giriş yaptı</p>
+                                <small class="text-muted">1 saat önce</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .stat-card {
+            border: none;
+            border-radius: 15px;
+            transition: transform 0.2s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+            .stat-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+            }
+
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .card-header {
+            border-bottom: 2px solid rgba(0,0,0,0.05);
+            font-weight: 600;
+        }
+
+        .btn-outline-primary, .btn-outline-success, .btn-outline-info, .btn-outline-warning {
+            border-width: 2px;
+            transition: all 0.3s ease;
+        }
+
+            .btn-outline-primary:hover, .btn-outline-success:hover,
+            .btn-outline-info:hover, .btn-outline-warning:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            }
+
+        .system-info .info-item {
+            transition: background-color 0.2s;
+        }
+
+            .system-info .info-item:hover {
+                background-color: rgba(0, 0, 0, 0.02);
+                border-radius: 5px;
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .timeline-marker {
+            position: absolute;
+            left: -30px;
+            top: 5px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .timeline-content {
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 3px solid #dee2e6;
+        }
+
+        .progress {
+            border-radius: 10px;
+        }
+
+        .badge {
+            font-size: 0.75rem;
+            padding: 0.35em 0.65em;
+        }
+
+        .h3 {
+            font-weight: 700;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        // Sayfa yüklendiğinde animasyonlar
+        $(document).ready(function() {
+            // Kartlara fade-in efekti
+            $('.stat-card').hide().fadeIn(800);
+
+            // Timeline item'larına sıralı animasyon
+            $('.timeline-item').each(function(i) {
+                $(this).delay(i * 200).fadeIn(600);
+            });
+
+            // Real-time saat güncellemesi
+            function updateClock() {
+                $('#currentTime').text(new Date().toLocaleTimeString('tr-TR'));
+            }
+            setInterval(updateClock, 1000);
+        });
+
+        // Hover efektleri
+        $('.stat-card').hover(
+            function() {
+                $(this).addClass('shadow-lg');
+            },
+            function() {
+                $(this).removeClass('shadow-lg');
+            }
+        );
+    </script>
+}
