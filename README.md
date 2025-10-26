@@ -2,8 +2,11 @@
 
 Bu proje, ASP.NET Core 9 Web API kullanılarak geliştirilmiş bir Stok ve Sipariş Yönetim Sistemidir. Sistem, ürün stok yönetimi, müşteri yönetimi, sipariş işlemleri ve raporlama özelliklerini içermektedir.
 
-## 🛠️ Kullanılan Teknolojiler
+<img width="1901" height="861" alt="admin" src="https://github.com/user-attachments/assets/808d3013-eff5-4eb9-93aa-b2f85b58a116" />
 
+<img width="1897" height="861" alt="user" src="https://github.com/user-attachments/assets/8f5e96c1-f2d8-4076-898c-093e2899961a" />
+
+## 🛠️ Kullanılan Teknolojiler
 - **ASP.NET Core 9** - Web API framework
 - **Entity Framework Core** - ORM (Code-First yaklaşımı)
 - **SQL Server** - Veritabanı
@@ -176,5 +179,6 @@ Sistem iki farklı rolü desteklemektedir:
 - Tüm entity'lerde soft delete desteği mevcut
 - API response'ları standart formatta dönmektedir
 - Loglama ve monitoring için gerekli altyapı hazırdır
+
 
 
