@@ -78,8 +78,9 @@ dotnet build
   "ConnectionStrings": {
     "DefaultConnection": "Server=DESKTOP-EQOD4HE;Database=StokYonetim;Trusted_Connection=True;TrustServerCertificate=True;"
   },
-..
-}
+```
+
+
 
 ### 4. Migration İşlemleri
 
@@ -89,8 +90,8 @@ dotnet ef migrations add yeni --project DataAccessLayer --startup-project DataAc
 
 # Veritabanı güncelleme
 dotnet ef database update --project DataAccessLayer --startup-project DataAccessLayer
-```
 
+```
 ### 5. Seed Data (Test Verileri)
 
 Proje ilk çalıştırmada otomatik olarak test verileri oluşturacaktır:
@@ -218,3 +219,4 @@ Sistem iki farklı rolü desteklemektedir:
 - Tüm entity'lerde soft delete desteği mevcut
 - API response'ları standart formatta dönmektedir
 - Loglama ve monitoring için gerekli altyapı hazırdır
+
