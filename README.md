@@ -11,49 +11,6 @@ Bu proje, ASP.NET Core 9 Web API kullanılarak geliştirilmiş bir Stok ve Sipar
 - **FluentValidation** - Request validasyonu
 - **JWT Authentication** - Kimlik doğrulama ve yetkilendirme
 
-## 📋 Proje Yapısı
-
-```
-StockOrderManagement/
-├── BusinessLayer/
-│   ├── Services/
-│   │   ├── AuthService.cs
-│   │   ├── CartService.cs
-│   │   ├── CategoryService.cs
-│   │   ├── CustomerService.cs
-│   │   ├── OrderService.cs
-│   │   ├── ProductService.cs
-│   │   └── UserService.cs
-├── DataAccessLayer/
-│   ├── Migrations/
-│   └── ApplicationDbContext.cs
-├── EntityLayer/
-│   │   ├── Category.cs
-│   │   ├── Customer.cs
-│   │   ├── Order.cs
-│   │   ├── OrderItem.cs
-│   │   ├── Product.cs
-│   │   ├── Role.cs
-│   │   ├── Sales.cs
-│   │   └── User.cs
-│   ├── DTOs/
-│   │   ├── Category/
-│   │   ├── Customer/
-│   │   ├── Order/
-│   │   ├── Product/
-│   │   └── User/
-│   └── Enums/
-│   │   ├── StatusHelper.cs
-├── WebAPI/
-│   ├── Controllers/
-│   ├── Middleware/
-│   │   └── ExceptionMiddleware.cs
-│   └── Program.cs
-└── StokSiparisYonetim/
-    ├── Controllers/
-    ├── Models/
-    └── Views/
-```
 
 ## 🚀 Kurulum Adımları
 
@@ -117,8 +74,8 @@ Sistem iki farklı rolü desteklemektedir:
 
 | Email | Password | Role |
 |-------|----------|------|
-| admin@admin.com | admin123! | Admin |
-| sevgi@sevgi.com | sevgi123! | User |
+| admin@admin.com | admin123 | Admin |
+| sevgi@sevgi.com | sevgi123 | User |
 
 ## 📚 API Endpoint'leri
 
@@ -219,4 +176,5 @@ Sistem iki farklı rolü desteklemektedir:
 - Tüm entity'lerde soft delete desteği mevcut
 - API response'ları standart formatta dönmektedir
 - Loglama ve monitoring için gerekli altyapı hazırdır
+
 
